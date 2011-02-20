@@ -124,3 +124,45 @@ class TestEloScoringStatic(unittest.TestCase):
 		}
 		result = self.points.calculate_scores([{self.kasparow: -5.0, self.polgar: -5.0}])
 		self.assertDictEqual(expected, result)
+
+
+class TestEloScoringMultiplayer(unittest.TestCase):
+	def setUp(self):
+		# for verification, use http://elo.divergentinformatics.com/
+		self.p1 = 'Player One'
+		self.p2 = 'Player Two'
+		self.p3 = 'Player Three'
+		self.p4 = 'Player Four'
+
+		elos = {
+			self.p1: 1392,
+			self.p2: 1455,
+			self.p3: 1200,
+			self.p4: 1533
+		}
+
+		# [-inf, 1200): 32
+		# [1200, 1500]: 24
+		# (1500, inf): 12
+		k_factors = { None: 32, 1200: 24, 1501: 12 }
+
+		self.scores = EloScoring(k_factors = k_factors, initial_scores = elos)
+
+	def test_with_one_match(self):
+		game = {
+			self.p1: -3, # third place
+			self.p2: -1,
+			self.p3: -4,
+			self.p4: -2,
+		}
+
+		expected = {
+			self.p1: 1381,
+			self.p2: 1484,
+			self.p3: 1186,
+			self.p4: 1531,
+		}
+
+		points = self.scores.calculate_scores([game])
+
+		self.assertDictEqual(expected, points)

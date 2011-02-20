@@ -2,6 +2,7 @@
 # coding=utf8
 
 from collections import defaultdict
+from itertools import combinations
 
 # interfaces
 class ScoringSystem(object):
@@ -56,28 +57,37 @@ class EloScoring(object):
 		points.update(self.initial_scores)
 
 		for game in games:
-			(player_a, gamescore_a), (player_b, gamescore_b) = game.iteritems()
+			adj = defaultdict(lambda: 0)
 
-			# calculate result
-			if gamescore_a > gamescore_b: result = 1.0
-			elif gamescore_a < gamescore_b: result = 0.0
-			else: result = 0.5
+			# cartesian product players X players, omitting equals
+			for player_a, player_b in combinations(game.keys(), 2):
+				gamescore_a, gamescore_b = game[player_a], game[player_b]
 
-			# update points
-			points[player_a], points[player_b] = self.calculate_single_match_score(points[player_a], points[player_b], result)
+				# calculate result
+				if gamescore_a > gamescore_b: result = 1.0
+				elif gamescore_a < gamescore_b: result = 0.0
+				else: result = 0.5
 
+				# update adjustments
+				adj_a, adj_b = self.calculate_single_match_adjustment(points[player_a], points[player_b], result)
+				adj[player_a] += adj_a
+				adj[player_b] += adj_b
+
+			# round values and update
+			for player, val in adj.iteritems():
+				points[player] += int(round(val))
 		return points
 
 
-	def calculate_single_match_score(self, points_a, points_b, result):
+	def calculate_single_match_adjustment(self, points_a, points_b, result):
 		"""calculate the new elo rankings for a single match. points_a and points_b are the
 		   players current ratings, result is 1.0 if player a won, 0.0 if player b won
 		   and 0.5 on a draw"""
 		expected = 1./(1+10**((points_b-points_a)/400.))
 
 		# note: float conversion implicit, since expected is always a float
-		return (int(round(points_a + self.get_k_factor_for(points_a) * (result - expected))),
-		        int(round(points_b + self.get_k_factor_for(points_b) * (expected - result))))
+		return (self.get_k_factor_for(points_a) * (result - expected),
+		        self.get_k_factor_for(points_b) * (expected - result))
 
 	def get_k_factor_for(self, points):
 		"""get the k factor for a player that has a certain amount of points"""
