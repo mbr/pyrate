@@ -43,7 +43,7 @@ class EloDict(defaultdict):
 	def __missing__(self, player):
 		if not self: return self.initial_average
 		# calculate current average and return it
-		return int(round(sum(self.values())/float(len(self))))
+		return sum(self.values())/float(len(self))
 
 
 class EloScoring(object):
@@ -75,7 +75,7 @@ class EloScoring(object):
 
 			# round values and update
 			for player, val in adj.iteritems():
-				points[player] += int(round(val))
+				points[player] += val
 		return points
 
 
