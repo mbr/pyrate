@@ -103,27 +103,30 @@ class TestEloScoringStatic(unittest.TestCase):
 
 	def test_elo_polgar_win(self):
 		expected = {
-			self.kasparow: 2798,
-			self.polgar: 2585,
+			self.kasparow: 2798.1111293179,
+			self.polgar: 2584.8888706821,
 		}
 		result = self.points.calculate_scores([{self.kasparow: -999, self.polgar: 1123}])
-		self.assertDictEqual(expected, result)
+		self.assertAlmostEqual(expected[self.kasparow], result[self.kasparow])
+		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
-	def test_elo_kasparov_win(self):
+	def test_elo_kasparow_win(self):
 		expected = {
-			self.kasparow: 2808,
-			self.polgar: 2575,
+			self.kasparow: 2808.1111293179,
+			self.polgar: 2574.8888706821,
 		}
 		result = self.points.calculate_scores([{self.kasparow: 13999, self.polgar: 13998}])
-		self.assertDictEqual(expected, result)
+		self.assertAlmostEqual(expected[self.kasparow], result[self.kasparow])
+		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
 	def test_elo_draw_game(self):
 		expected = {
-			self.kasparow: 2803,
-			self.polgar: 2580,
+			self.kasparow: 2803.1111293179,
+			self.polgar: 2579.8888706821,
 		}
 		result = self.points.calculate_scores([{self.kasparow: -5.0, self.polgar: -5.0}])
-		self.assertDictEqual(expected, result)
+		self.assertAlmostEqual(expected[self.kasparow], result[self.kasparow])
+		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
 
 class TestEloScoringMultiplayer(unittest.TestCase):
