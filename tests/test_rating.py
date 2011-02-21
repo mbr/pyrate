@@ -41,7 +41,7 @@ class TestTallyRating(unittest.TestCase):
 
 		rating_table = [9, 6, 3, 1]
 
-		expected_scores = {
+		expected_ratings = {
 			'Toad': 27,
 			'Peach': 24,
 			'Donkey': 6,
@@ -55,8 +55,8 @@ class TestTallyRating(unittest.TestCase):
 		# instantiate rating system
 		rating_system = TallyRating(rating_table)
 
-		scores = rating_system.calculate_scores(games)
-		self.assertDictEqual(expected_scores, dict(scores))
+		ratings = rating_system.calculate_ratings(games)
+		self.assertDictEqual(expected_ratings, dict(ratings))
 
 
 class TestEloDict(unittest.TestCase):
@@ -99,14 +99,14 @@ class TestEloRatingStatic(unittest.TestCase):
 
 		k_factors = {None: 10}
 
-		self.points = EloRating(k_factors = k_factors, initial_scores = elos)
+		self.points = EloRating(k_factors = k_factors, initial_ratings = elos)
 
 	def test_elo_polgar_win(self):
 		expected = {
 			self.kasparow: 2798.1111293179,
 			self.polgar: 2584.8888706821,
 		}
-		result = self.points.calculate_scores([{self.kasparow: -999, self.polgar: 1123}])
+		result = self.points.calculate_ratings([{self.kasparow: -999, self.polgar: 1123}])
 		self.assertAlmostEqual(expected[self.kasparow], result[self.kasparow])
 		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
@@ -115,7 +115,7 @@ class TestEloRatingStatic(unittest.TestCase):
 			self.kasparow: 2808.1111293179,
 			self.polgar: 2574.8888706821,
 		}
-		result = self.points.calculate_scores([{self.kasparow: 13999, self.polgar: 13998}])
+		result = self.points.calculate_ratings([{self.kasparow: 13999, self.polgar: 13998}])
 		self.assertAlmostEqual(expected[self.kasparow], result[self.kasparow])
 		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
@@ -124,7 +124,7 @@ class TestEloRatingStatic(unittest.TestCase):
 			self.kasparow: 2803.1111293179,
 			self.polgar: 2579.8888706821,
 		}
-		result = self.points.calculate_scores([{self.kasparow: -5.0, self.polgar: -5.0}])
+		result = self.points.calculate_ratings([{self.kasparow: -5.0, self.polgar: -5.0}])
 		self.assertAlmostEqual(expected[self.kasparow], result[self.kasparow])
 		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
@@ -149,7 +149,7 @@ class TestEloRatingMultiplayer(unittest.TestCase):
 		# (1500, inf): 12
 		k_factors = { None: 32, 1200: 24, 1501: 12 }
 
-		self.scores = EloRating(k_factors = k_factors, initial_scores = elos)
+		self.ratings = EloRating(k_factors = k_factors, initial_ratings = elos)
 
 	def test_with_one_match(self):
 		game = {
@@ -166,7 +166,7 @@ class TestEloRatingMultiplayer(unittest.TestCase):
 			self.p4: 1530.90409929,
 		}
 
-		points = self.scores.calculate_scores([game])
+		points = self.ratings.calculate_ratings([game])
 
 		for player in expected:
 			self.assertAlmostEqual(expected[player], points[player])

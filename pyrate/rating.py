@@ -6,8 +6,8 @@ from itertools import combinations
 
 # interfaces
 class RatingSystem(object):
-	def calculate_scores(self, games):
-		"""return scores for all player
+	def calculate_ratings(self, games):
+		"""return ratings for all player
 		   games is an iterable that returns all games in order.
 
 		   a game must support a dict-like interface (iterating over
@@ -20,19 +20,19 @@ class TallyRating(object):
 	def __init__(self, rating_table = [10, 8, 6, 5, 4, 3, 2, 1]):
 		self.rating_table = rating_table
 
-	def calculate_scores(self, games):
-		player_scores = defaultdict(lambda: 0)
+	def calculate_ratings(self, games):
+		player_ratings = defaultdict(lambda: 0)
 
 		for game in games:
 			winner_iter = iter(sorted(game.iteritems(), key = lambda t: t[1], reverse = True))
-			for current_score in self.rating_table:
+			for current_rating in self.rating_table:
 				try:
 					player, gamepoints = winner_iter.next()
-					player_scores[player] += current_score
+					player_ratings[player] += current_rating
 				except StopIteration:
 					break
 
-		return player_scores
+		return player_ratings
 
 
 class EloDict(defaultdict):
@@ -47,14 +47,14 @@ class EloDict(defaultdict):
 
 
 class EloRating(object):
-	def __init__(self, k_factors = { None: 32, 2100: 24, 2401: 12 }, initial_average = 1000, initial_scores = {}):
+	def __init__(self, k_factors = { None: 32, 2100: 24, 2401: 12 }, initial_average = 1000, initial_ratings = {}):
 		self.k_factors = sorted(k_factors.iteritems()) # none gets sorted to the front, always
 		self.initial_average = initial_average
-		self.initial_scores = initial_scores
+		self.initial_ratings = initial_ratings
 
-	def calculate_scores(self, games):
+	def calculate_ratings(self, games):
 		points = EloDict(self.initial_average, )
-		points.update(self.initial_scores)
+		points.update(self.initial_ratings)
 
 		for game in games:
 			adj = defaultdict(lambda: 0)
