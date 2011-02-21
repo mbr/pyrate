@@ -3,9 +3,9 @@
 
 import unittest2 as unittest
 
-from scoring import *
+from rating import *
 
-class TestTallyScoring(unittest.TestCase):
+class TestTallyRating(unittest.TestCase):
 	def test_mario_kart_sample_data(self):
 		race_1 = {
 			'Toad': -1,
@@ -39,7 +39,7 @@ class TestTallyScoring(unittest.TestCase):
 			'Wario': -5,
 		}
 
-		scoring_table = [9, 6, 3, 1]
+		rating_table = [9, 6, 3, 1]
 
 		expected_scores = {
 			'Toad': 27,
@@ -52,10 +52,10 @@ class TestTallyScoring(unittest.TestCase):
 
 		games = [race_1, race_2, race_3, race_4]
 
-		# instantiate scoring system
-		scoring_system = TallyScoring(scoring_table)
+		# instantiate rating system
+		rating_system = TallyRating(rating_table)
 
-		scores = scoring_system.calculate_scores(games)
+		scores = rating_system.calculate_scores(games)
 		self.assertDictEqual(expected_scores, dict(scores))
 
 
@@ -86,7 +86,7 @@ class TestEloDict(unittest.TestCase):
 		self.assertEqual(e['d'], 5)
 
 
-class TestEloScoringStatic(unittest.TestCase):
+class TestEloRatingStatic(unittest.TestCase):
 	def setUp(self):
 		# example from http://de.wikipedia.org/wiki/Elo-Zahl
 		self.kasparow = u'Garri Kasparov'
@@ -99,7 +99,7 @@ class TestEloScoringStatic(unittest.TestCase):
 
 		k_factors = {None: 10}
 
-		self.points = EloScoring(k_factors = k_factors, initial_scores = elos)
+		self.points = EloRating(k_factors = k_factors, initial_scores = elos)
 
 	def test_elo_polgar_win(self):
 		expected = {
@@ -129,7 +129,7 @@ class TestEloScoringStatic(unittest.TestCase):
 		self.assertAlmostEqual(expected[self.polgar], result[self.polgar])
 
 
-class TestEloScoringMultiplayer(unittest.TestCase):
+class TestEloRatingMultiplayer(unittest.TestCase):
 	def setUp(self):
 		# for verification, use http://elo.divergentinformatics.com/
 		self.p1 = 'Player One'
@@ -149,7 +149,7 @@ class TestEloScoringMultiplayer(unittest.TestCase):
 		# (1500, inf): 12
 		k_factors = { None: 32, 1200: 24, 1501: 12 }
 
-		self.scores = EloScoring(k_factors = k_factors, initial_scores = elos)
+		self.scores = EloRating(k_factors = k_factors, initial_scores = elos)
 
 	def test_with_one_match(self):
 		game = {

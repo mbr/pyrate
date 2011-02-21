@@ -5,7 +5,7 @@ from collections import defaultdict
 from itertools import combinations
 
 # interfaces
-class ScoringSystem(object):
+class RatingSystem(object):
 	def calculate_scores(self, games):
 		"""return scores for all player
 		   games is an iterable that returns all games in order.
@@ -16,16 +16,16 @@ class ScoringSystem(object):
 		raise NotImplementedError
 
 
-class TallyScoring(object):
-	def __init__(self, scoring_table = [10, 8, 6, 5, 4, 3, 2, 1]):
-		self.scoring_table = scoring_table
+class TallyRating(object):
+	def __init__(self, rating_table = [10, 8, 6, 5, 4, 3, 2, 1]):
+		self.rating_table = rating_table
 
 	def calculate_scores(self, games):
 		player_scores = defaultdict(lambda: 0)
 
 		for game in games:
 			winner_iter = iter(sorted(game.iteritems(), key = lambda t: t[1], reverse = True))
-			for current_score in self.scoring_table:
+			for current_score in self.rating_table:
 				try:
 					player, gamepoints = winner_iter.next()
 					player_scores[player] += current_score
@@ -46,7 +46,7 @@ class EloDict(defaultdict):
 		return sum(self.values())/float(len(self))
 
 
-class EloScoring(object):
+class EloRating(object):
 	def __init__(self, k_factors = { None: 32, 2100: 24, 2401: 12 }, initial_average = 1000, initial_scores = {}):
 		self.k_factors = sorted(k_factors.iteritems()) # none gets sorted to the front, always
 		self.initial_average = initial_average
