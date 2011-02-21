@@ -160,12 +160,13 @@ class TestEloScoringMultiplayer(unittest.TestCase):
 		}
 
 		expected = {
-			self.p1: 1381,
-			self.p2: 1484,
-			self.p3: 1186,
-			self.p4: 1531,
+			self.p1: 1380.74174645,
+			self.p2: 1483.9915497,
+			self.p3: 1186.45850528,
+			self.p4: 1530.90409929,
 		}
 
 		points = self.scores.calculate_scores([game])
 
-		self.assertDictEqual(expected, points)
+		for player in expected:
+			self.assertAlmostEqual(expected[player], points[player])
