@@ -3,7 +3,7 @@
 
 import unittest2 as unittest
 
-from rating import *
+from pyrate.rating import *
 
 class TestTallyRating(unittest.TestCase):
 	def test_mario_kart_sample_data(self):
