@@ -170,3 +170,14 @@ class TestEloRatingMultiplayer(unittest.TestCase):
 
 		for player in expected:
 			self.assertAlmostEqual(expected[player], points[player])
+
+
+class TestGlickRating(unittest.TestCase):
+	def setUp(self):
+		pass
+
+	def test_c_squared_calculation(self):
+		glicko = GlickoRating()
+		glicko.calc_c_squared(30)
+
+		self.assertAlmostEqual(4000.0, glicko.c_squared)

@@ -98,3 +98,38 @@ class EloRating(object):
 			k = k_factor
 
 		return k
+
+
+class GlickoRating(object):
+	def calc_c_squared(self, t, typical_rd = 50):
+		"""c_squared is a constant that indicates how much weight is given to inactivity. The details are found
+		in [1].
+
+		This function calculates c_squared and updates it on the instance. `t` should be the number of
+		rating periods after which a players rating is as unreliable as a new players. `typical_rd` is median-ish
+		RD."""
+		self.c_squared = (self.initial_rd**2 - typical_rd**2)/float(t)
+
+	def __init__(self, c_squared = 0, rd_floor = 30, initial_rating = 1500, initial_rd = 350):
+		"""The glicko rating system is named after Mark E. Glickman, Ph. D. Information about it can be found at
+		http://glicko.net, specifically [1], and of course in http://en.wikipedia.org/wiki/Glicko_rating_system
+
+		The system uses "rating periods" - all games during a rating period are applied at the same time, a players
+		rating can only change after a period. It is possible, however, to use a rating period of 'one game', as is
+		done by the FICS (Free Internet Chess Server). In the original paper, a rating period that encompasses a
+		"moderate" of games, i.e. 5-10 on average, is recommended [1].
+
+		c_squared is a constant, see the calc_c_squared() method for details. It is recommended to call calc_c_squared()
+		after instantiating this rating system.
+
+		As suggested in [1], rd_floor is a value below rd may never fall. Otherwise a player could get 'stuck'
+		at a certain rating without being able to improve upon, becaues his RD is very small.
+
+		The initial_rating and initial_rd parameters are not normally changed, this is different from
+		the ELO system.
+
+		[1]: http://www.glicko.net/glicko/glicko.doc/glicko.html"""
+		self.initial_rating = initial_rating
+		self.initial_rd = initial_rd
+		self.rd_floor = rd_floor
+		self.c_squared = c_squared
