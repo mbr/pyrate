@@ -122,7 +122,7 @@ class GlickoRating(object):
 		RD."""
 		self.c_squared = (self.initial_rd**2 - typical_rd**2)/float(t)
 
-	def __init__(self, c_squared = 0, rd_floor = 30, initial_rating = 1500, initial_rd = 350):
+	def __init__(self, c_squared = 0., rd_floor = 30, initial_rating = 1500, initial_rd = 350):
 		"""The glicko rating system is named after Mark E. Glickman, Ph. D. Information about it can be found at
 		http://glicko.net, specifically [1], and of course in http://en.wikipedia.org/wiki/Glicko_rating_system
 
