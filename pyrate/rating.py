@@ -189,15 +189,15 @@ class GlickoRating(object):
 
 		# handle last group
 		if current_group:
-			self._handle_period_group(data, group, current_group_period)
+			self._handle_period_group(data, current_group, current_group_period)
 
 		return data
 
-	def _handle_period_group(self, group, game_period):
+	def _handle_period_group(self, data, group, game_period):
 		# get a set of players
 		players = set()
 		for game in group:
-			players.add(game.keys())
+			players = players.union(game.keys())
 
 		RDs = {}
 
@@ -215,7 +215,7 @@ class GlickoRating(object):
 		dsqsum = defaultdict(lambda: 0)
 
 		for game in group:
-			for player, opponent in permutations[game.keys(), 2]:
+			for player, opponent in permutations(game.keys(), 2):
 				# calculate s_j
 				if game[player] > game[opponent]: s_j = 1.0
 				elif game[player] < game[opponent]: s_j = 0
@@ -224,13 +224,13 @@ class GlickoRating(object):
 				E = self.E(data[player][0], data[opponent][0], RDs[opponent])
 				g = self.g(RDs[opponent])
 
-				rsum += g*(s_j - E)
-				dsqsum += g**2*E*(1.-E)
+				rsum[player] += g*(s_j - E)
+				dsqsum[player] += g**2*E*(1.-E)
 
 		# we got all the sums, now update for each player
 		for player in players:
 			d_sq = 1./(self.q**2 * dsqsum[player])
-			denom = 1./(1./RDs[player]**2 + 1./d_sq)
+			denom = (1./RDs[player]**2 + 1./d_sq)
 
 			r_new = data[player][0] + self.q/denom * rsum[player]
 			rd_new = sqrt(1./denom)
