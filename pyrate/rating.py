@@ -4,6 +4,8 @@
 from collections import defaultdict
 from itertools import combinations
 
+from math import sqrt
+
 # interfaces
 class RatingSystem(object):
 	def calculate_ratings(self, games):
@@ -133,3 +135,8 @@ class GlickoRating(object):
 		self.initial_rd = initial_rd
 		self.rd_floor = rd_floor
 		self.c_squared = c_squared
+
+	def calc_current_rd(self, rd_old, t):
+		"""calculate the rd adjusted for inactivity (`t` time periods passed) based on
+		`rd_old`"""
+		return min(sqrt(rd_old**2 + self.c_squared * t), self.initial_rd)

@@ -181,3 +181,10 @@ class TestGlickRating(unittest.TestCase):
 		glicko.calc_c_squared(30)
 
 		self.assertAlmostEqual(4000.0, glicko.c_squared)
+
+	def test_calc_current_rd(self):
+		glicko = GlickoRating()
+		glicko.calc_c_squared(30)
+
+		self.assertAlmostEqual(211.896201004171, glicko.calc_current_rd(70.0, 10))
+		self.assertAlmostEqual(350, glicko.calc_current_rd(70.0, 10000000))
