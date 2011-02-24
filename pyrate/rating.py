@@ -4,7 +4,7 @@
 from collections import defaultdict
 from itertools import combinations
 
-from math import sqrt
+from math import sqrt, log, pi
 
 # interfaces
 class RatingSystem(object):
@@ -103,6 +103,16 @@ class EloRating(object):
 
 
 class GlickoRating(object):
+	q = log(10)/400.
+
+	@classmethod
+	def g(c_, RD):
+		return 1./sqrt(1+3 * c_.q**2 * RD**2 / pi**2)
+
+	@classmethod
+	def E(c_, r, r_j, RD_j):
+		return 1./(1+10**(-c_.g(RD_j) * (r-r_j)/400.))
+
 	def calc_c_squared(self, t, typical_rd = 50):
 		"""c_squared is a constant that indicates how much weight is given to inactivity. The details are found
 		in [1].

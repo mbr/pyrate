@@ -171,6 +171,46 @@ class TestEloRatingMultiplayer(unittest.TestCase):
 		for player in expected:
 			self.assertAlmostEqual(expected[player], points[player])
 
+class TestGlickoInternal(unittest.TestCase):
+	def test_q(self):
+		self.assertAlmostEqual(0.00575646273248511, GlickoRating.q)
+
+	def test_g(self):
+		RD = 65.0
+		self.assertAlmostEqual(0.979377963908954, GlickoRating.g(RD))
+
+	def test_e(self):
+		self.assertAlmostEqual(0.429991057458172, GlickoRating.E(1250.0, 1300.0, 65.0))
+
+	def test_paper_examples(self):
+		r = 1500
+		RD = 200
+
+		r_j = 1400
+		RD_j = 30
+		expected_g = 0.9955
+		decimal_places_g = 4
+		expected_E = 0.639
+		decimal_places_E = 3
+		self.assertAlmostEqual(GlickoRating.g(RD_j), expected_g, decimal_places_g)
+		self.assertAlmostEqual(GlickoRating.E(r, r_j, RD_j), expected_E, decimal_places_E)
+
+		r_j = 1550
+		RD_j = 100
+		expected_g = 0.9531
+		expected_E = 0.432
+
+		self.assertAlmostEqual(GlickoRating.g(RD_j), expected_g, decimal_places_g)
+		self.assertAlmostEqual(GlickoRating.E(r, r_j, RD_j), expected_E, decimal_places_E)
+
+		r_j = 1700
+		RD_j = 300
+		expected_g = 0.7242
+		expected_E = 0.303
+
+		self.assertAlmostEqual(GlickoRating.g(RD_j), expected_g, decimal_places_g)
+		self.assertAlmostEqual(GlickoRating.E(r, r_j, RD_j), expected_E, decimal_places_E)
+
 
 class TestGlickRating(unittest.TestCase):
 	def setUp(self):
