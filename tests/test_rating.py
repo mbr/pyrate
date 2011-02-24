@@ -228,3 +228,21 @@ class TestGlickRating(unittest.TestCase):
 
 		self.assertAlmostEqual(211.896201004171, glicko.calc_current_rd(70.0, 10))
 		self.assertAlmostEqual(350, glicko.calc_current_rd(70.0, 10000000))
+
+	def test_paper_example(self):
+		# example taken from paper
+		glicko = GlickoRating()
+
+		r = 1500
+		rd = 200
+
+		results = [
+			(1400, 30, 1),
+			(1550, 100, 0),
+			(1700, 300, 0),
+		]
+
+		new_rating, new_rd = glicko.calculate_single_period_rating(r, rd, results)
+
+		self.assertAlmostEqual(1464, new_rating, 0)
+		self.assertAlmostEqual(151.4, new_rd, 1)

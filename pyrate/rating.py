@@ -150,3 +150,33 @@ class GlickoRating(object):
 		"""calculate the rd adjusted for inactivity (`t` time periods passed) based on
 		`rd_old`"""
 		return min(sqrt(rd_old**2 + self.c_squared * t), self.initial_rd)
+
+	def calculate_single_period_rating(self, rating, rd, results):
+		"""calculate the new (rating, rd) pair for a player during a rating period.
+		rating is the players rating at the start of the period, rd his updated rd
+		(use calc_current_rd() to do that)
+
+		results is an iterable over all matches in the rating period that returns
+		`(opponent_rating, opponent_rd, result)` tuples, where `opponent_rd`
+		is the opponents inactivity adjusted RD (again, see calc_current_rd()) and
+		`result` is 1.0 if the player won against the opponent, 0.5 on a draw and
+		0.0 otherwise (i.e. the player lost)"""
+		d_squared_sum = 0
+		r_sum = 0
+		for r_op, rd_op, result in results:
+			# for calculating d_sq
+			E_op = self.E(rating, r_op, rd_op)
+			g_op = self.g(rd_op)
+			d_squared_sum += g_op**2 * E_op * (1-E_op)
+
+			# for calculating the new rating
+			r_sum += g_op * (result - E_op)
+
+		d_sq = 1./(self.q**2 * d_squared_sum)
+		denom = 1./rd**2 + 1./d_sq
+
+		# finally, calculate rating and rd
+		r_new = rating + self.q/denom * r_sum
+		rd_new = sqrt(1./denom)
+
+		return (r_new, rd_new)
