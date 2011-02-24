@@ -212,7 +212,7 @@ class TestGlickoInternal(unittest.TestCase):
 		self.assertAlmostEqual(GlickoRating.E(r, r_j, RD_j), expected_E, decimal_places_E)
 
 
-class TestGlickRating(unittest.TestCase):
+class TestGlickoRating(unittest.TestCase):
 	def setUp(self):
 		pass
 
@@ -230,19 +230,23 @@ class TestGlickRating(unittest.TestCase):
 		self.assertAlmostEqual(350, glicko.calc_current_rd(70.0, 10000000))
 
 	def test_paper_example(self):
+		games = [{'playerOne': 50,
+		          'playerTwo': 0},
+		         {'playerOne': 40,
+		          'playerThree': 100},
+		         {'playerOne': 0,
+		          'playerFour': 1}]
+
+		data = {
+			'playerOne': (1500, 200, None),
+			'playerTwo': (1400, 30, None),
+			'playerThree': (1550, 100, None),
+			'playerFour': (1700, 300, None),
+		}
+
 		# example taken from paper
-		glicko = GlickoRating()
+		glicko = GlickoRating(get_period_func = lambda _g: 0, initial_data = data)
 
-		r = 1500
-		rd = 200
-
-		results = [
-			(1400, 30, 1),
-			(1550, 100, 0),
-			(1700, 300, 0),
-		]
-
-		new_rating, new_rd = glicko.calculate_single_period_rating(r, rd, results)
-
-		self.assertAlmostEqual(1464, new_rating, 0)
-		self.assertAlmostEqual(151.4, new_rd, 1)
+		new_data = glicko.calculate_ratings(games)
+		self.assertAlmostEqual(1464, new_data['playerOne'][0], 0)
+		self.assertAlmostEqual(151.4, new_data['playerOne'][1], 1)
