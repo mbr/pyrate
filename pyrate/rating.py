@@ -2,7 +2,7 @@
 # coding=utf8
 
 from collections import defaultdict
-from itertools import combinations
+from itertools import combinations, permutations
 
 from math import sqrt, log, pi
 
@@ -122,7 +122,7 @@ class GlickoRating(object):
 		RD."""
 		self.c_squared = (self.initial_rd**2 - typical_rd**2)/float(t)
 
-	def __init__(self, c_squared = 0., rd_floor = 30, initial_rating = 1500, initial_rd = 350):
+	def __init__(self, initial_data = {}, c_squared = 0., rd_floor = 30, initial_rating = 1500, initial_rd = 350, get_period_func = lambda game: game.period):
 		"""The glicko rating system is named after Mark E. Glickman, Ph. D. Information about it can be found at
 		http://glicko.net, specifically [1], and of course in http://en.wikipedia.org/wiki/Glicko_rating_system
 
@@ -140,11 +140,104 @@ class GlickoRating(object):
 		The initial_rating and initial_rd parameters are not normally changed, this is different from
 		the ELO system.
 
+		`initial_data` can be used to start with set ratings for some players. This dictionary should have the same
+		structure as the return value of calculate_ratings.
+
+		`get_period_func` is a function that should return the absolute period number
+		for a game (the difference between two game's period's is used to calculate the
+		time a player has been inactive)
+
 		[1]: http://www.glicko.net/glicko/glicko.doc/glicko.html"""
 		self.initial_rating = initial_rating
 		self.initial_rd = initial_rd
+		self.initial_data = initial_data
 		self.rd_floor = rd_floor
 		self.c_squared = c_squared
+		self.get_period_func = get_period_func
+
+	def calculate_ratings(self, games):
+		"""calculate ratings for a set of games.
+		games must be iterable and return games in order. every game is assumed to be
+		a dictionary-like object, the keys being the players and the values their game-specific
+		score in that game, the hightest score is considered the winner
+
+		Note that "in-order" also implies that the rating periods of a game can never be earlier
+		than those of a game that preceded it.
+
+		The return value is dictionary that maps players to tuples of
+		(rating, ratings deviation (RD), t (period) of last game"""
+
+		# bind for closure, using self seems risky here
+		initial_rating = self.initial_rating
+		initial_rd = self.initial_rd
+		data = defaultdict(lambda: (initial_rating, initial_rd, None), self.initial_data)
+
+		current_group = []
+		current_group_period = None
+		for game in games:
+			game_period = self.get_period_func(game)
+			if None == current_group_period or current_group_period == game_period:
+				current_group.append(game)
+				continue
+
+			# group finished
+			self._handle_period_group(data, group, current_group_period)
+
+			# next group starts with this game
+			current_group_period = game_period
+			current_group = [game]
+
+		# handle last group
+		if current_group:
+			self._handle_period_group(data, group, current_group_period)
+
+		return data
+
+	def _handle_period_group(self, group, game_period):
+		# get a set of players
+		players = set()
+		for game in group:
+			players.add(game.keys())
+
+		RDs = {}
+
+		# determine RD for every player (these can only increase due to
+		# time spent absent here)
+		for player in players:
+			if None == data[player][2]:
+				# player has not played a match yet, copy default value
+				RDs[player] = data[player][1]
+			else:
+				RDs[player] = self.calc_current_rd(data[player][1], game_period - data[player][2])
+
+		# do the match calculations
+		rsum = defaultdict(lambda: 0)
+		dsqsum = defaultdict(lambda: 0)
+
+		for game in group:
+			for player, opponent in permutations[game.keys(), 2]:
+				# calculate s_j
+				if game[player] > game[opponent]: s_j = 1.0
+				elif game[player] < game[opponent]: s_j = 0
+				else: s_j = 0.5
+
+				E = self.E(data[player][0], data[opponent][0], RDs[opponent])
+				g = self.g(RDs[opponent])
+
+				rsum += g*(s_j - E)
+				dsqsum += g**2*E*(1.-E)
+
+		# we got all the sums, now update for each player
+		for player in players:
+			d_sq = 1./(self.q**2 * dsqsum[player])
+			denom = 1./(1./RDs[player]**2 + 1./d_sq)
+
+			r_new = data[player][0] + self.q/denom * rsum[player]
+			rd_new = sqrt(1./denom)
+
+			# finally, update tuple in data
+			data[player] = (r_new, rd_new, game_period)
+
 
 	def calc_current_rd(self, rd_old, t):
 		"""calculate the rd adjusted for inactivity (`t` time periods passed) based on
